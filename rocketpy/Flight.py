@@ -516,6 +516,7 @@ class Flight:
         heading=90,
         initialSolution=None,
         terminateOnApogee=False,
+        terminateOnRail=False,
         maxTime=600,
         maxTimeStep=np.inf,
         minTimeStep=0,
@@ -603,6 +604,8 @@ class Flight:
         self.initialSolution = initialSolution
         self.timeOvershoot = timeOvershoot
         self.terminateOnApogee = terminateOnApogee
+        self.terminateOnRail = terminateOnRail
+
 
         # Modifying Rail Length for a better out of rail condition
         upperRButton = max(self.rocket.railButtons[0])
@@ -905,15 +908,29 @@ class Flight:
                         self.outOfRailVelocity = (
                             self.y[3] ** 2 + self.y[4] ** 2 + self.y[5] ** 2
                         ) ** (0.5)
-                        # Create new flight phase
-                        self.flightPhases.addPhase(
-                            self.t, self.uDot, index=phase_index + 1
+                        if self.terminateOnRail:
+                            # print('Terminate on Rail Activated!')
+                            self.tFinal = self.t
+                            self.state = self.outOfRailState
+                            # Roll back solution
+                            self.solution[-1] = [self.t, *self.state]
+                            # Set last flight phase
+                            self.flightPhases.flushAfter(phase_index)
+                            print(self.t)
+                            self.flightPhases.addPhase(self.t)
+                            # Prepare to leave loops and start new flight phase
+                            phase.timeNodes.flushAfter(node_index)
+                            phase.timeNodes.addNode(self.t, [], [])
+                            phase.solver.status = "finished"
+                        else:
+                            # Create new flight phase
+                            self.flightPhases.addPhase(
+                                self.t, self.uDot, index=phase_index + 1
                         )
                         # Prepare to leave loops and start new flight phase
                         phase.timeNodes.flushAfter(node_index)
                         phase.timeNodes.addNode(self.t, [], [])
                         phase.solver.status = "finished"
-
                     # Check for apogee event
                     if len(self.apogeeState) == 1 and self.y[5] < 0:
                         # print('\nPASSIVE EVENT DETECTED')
@@ -1937,87 +1954,87 @@ class Flight:
         # Drag Power
         self.dragPower = self.R3 * self.speed
         self.dragPower.setOutputs("Drag Power (W)")
-
-        # Stability and Control variables
-        # Angular velocities frequency response - Fourier Analysis
-        # Omega 1 - w1
-        Fs = 100.0
-        # sampling rate
-        Ts = 1.0 / Fs
-        # sampling interval
-        t = np.arange(1, self.tFinal, Ts)  # time vector
-        y = self.w1(t)
-        y -= np.mean(y)
-        n = len(y)  # length of the signal
-        k = np.arange(n)
-        T = n / Fs
-        frq = k / T  # two sides frequency range
-        frq = frq[range(n // 2)]  # one side frequency range
-        Y = np.fft.fft(y) / n  # fft computing and normalization
-        Y = Y[range(n // 2)]
-        omega1FrequencyResponse = np.column_stack([frq, abs(Y)])
-        self.omega1FrequencyResponse = Function(
-            omega1FrequencyResponse, "Frequency (Hz)", "Omega 1 Angle Fourier Amplitude"
-        )
-        # Omega 2 - w2
-        Fs = 100.0
-        # sampling rate
-        Ts = 1.0 / Fs
-        # sampling interval
-        t = np.arange(1, self.tFinal, Ts)  # time vector
-        y = self.w2(t)
-        y -= np.mean(y)
-        n = len(y)  # length of the signal
-        k = np.arange(n)
-        T = n / Fs
-        frq = k / T  # two sides frequency range
-        frq = frq[range(n // 2)]  # one side frequency range
-        Y = np.fft.fft(y) / n  # fft computing and normalization
-        Y = Y[range(n // 2)]
-        omega2FrequencyResponse = np.column_stack([frq, abs(Y)])
-        self.omega2FrequencyResponse = Function(
-            omega2FrequencyResponse, "Frequency (Hz)", "Omega 2 Angle Fourier Amplitude"
-        )
-        # Omega 3 - w3
-        Fs = 100.0
-        # sampling rate
-        Ts = 1.0 / Fs
-        # sampling interval
-        t = np.arange(1, self.tFinal, Ts)  # time vector
-        y = self.w3(t)
-        y -= np.mean(y)
-        n = len(y)  # length of the signal
-        k = np.arange(n)
-        T = n / Fs
-        frq = k / T  # two sides frequency range
-        frq = frq[range(n // 2)]  # one side frequency range
-        Y = np.fft.fft(y) / n  # fft computing and normalization
-        Y = Y[range(n // 2)]
-        omega3FrequencyResponse = np.column_stack([frq, abs(Y)])
-        self.omega3FrequencyResponse = Function(
-            omega3FrequencyResponse, "Frequency (Hz)", "Omega 3 Angle Fourier Amplitude"
-        )
-        # Attitude Frequency Response
-        Fs = 100.0
-        # sampling rate
-        Ts = 1.0 / Fs
-        # sampling interval
-        t = np.arange(1, self.tFinal, Ts)  # time vector
-        y = self.attitudeAngle(t)
-        y -= np.mean(y)
-        n = len(y)  # length of the signal
-        k = np.arange(n)
-        T = n / Fs
-        frq = k / T  # two sides frequency range
-        frq = frq[range(n // 2)]  # one side frequency range
-        Y = np.fft.fft(y) / n  # fft computing and normalization
-        Y = Y[range(n // 2)]
-        attitudeFrequencyResponse = np.column_stack([frq, abs(Y)])
-        self.attitudeFrequencyResponse = Function(
-            attitudeFrequencyResponse,
-            "Frequency (Hz)",
-            "Attitude Angle Fourier Amplitude",
-        )
+        if self.terminateOnRail == False:
+            # Stability and Control variables
+            # Angular velocities frequency response - Fourier Analysis
+            # Omega 1 - w1
+            Fs = 100.0
+            # sampling rate
+            Ts = 1.0 / Fs
+            # sampling interval
+            t = np.arange(1, self.tFinal, Ts)  # time vector
+            y = self.w1(t)
+            y -= np.mean(y)
+            n = len(y)  # length of the signal
+            k = np.arange(n)
+            T = n / Fs
+            frq = k / T  # two sides frequency range
+            frq = frq[range(n // 2)]  # one side frequency range
+            Y = np.fft.fft(y) / n  # fft computing and normalization
+            Y = Y[range(n // 2)]
+            omega1FrequencyResponse = np.column_stack([frq, abs(Y)])
+            self.omega1FrequencyResponse = Function(
+                omega1FrequencyResponse, "Frequency (Hz)", "Omega 1 Angle Fourier Amplitude"
+            )
+            # Omega 2 - w2
+            Fs = 100.0
+            # sampling rate
+            Ts = 1.0 / Fs
+            # sampling interval
+            t = np.arange(1, self.tFinal, Ts)  # time vector
+            y = self.w2(t)
+            y -= np.mean(y)
+            n = len(y)  # length of the signal
+            k = np.arange(n)
+            T = n / Fs
+            frq = k / T  # two sides frequency range
+            frq = frq[range(n // 2)]  # one side frequency range
+            Y = np.fft.fft(y) / n  # fft computing and normalization
+            Y = Y[range(n // 2)]
+            omega2FrequencyResponse = np.column_stack([frq, abs(Y)])
+            self.omega2FrequencyResponse = Function(
+                omega2FrequencyResponse, "Frequency (Hz)", "Omega 2 Angle Fourier Amplitude"
+            )
+            # Omega 3 - w3
+            Fs = 100.0
+            # sampling rate
+            Ts = 1.0 / Fs
+            # sampling interval
+            t = np.arange(1, self.tFinal, Ts)  # time vector
+            y = self.w3(t)
+            y -= np.mean(y)
+            n = len(y)  # length of the signal
+            k = np.arange(n)
+            T = n / Fs
+            frq = k / T  # two sides frequency range
+            frq = frq[range(n // 2)]  # one side frequency range
+            Y = np.fft.fft(y) / n  # fft computing and normalization
+            Y = Y[range(n // 2)]
+            omega3FrequencyResponse = np.column_stack([frq, abs(Y)])
+            self.omega3FrequencyResponse = Function(
+                omega3FrequencyResponse, "Frequency (Hz)", "Omega 3 Angle Fourier Amplitude"
+            )
+            # Attitude Frequency Response
+            Fs = 100.0
+            # sampling rate
+            Ts = 1.0 / Fs
+            # sampling interval
+            t = np.arange(1, self.tFinal, Ts)  # time vector
+            y = self.attitudeAngle(t)
+            y -= np.mean(y)
+            n = len(y)  # length of the signal
+            k = np.arange(n)
+            T = n / Fs
+            frq = k / T  # two sides frequency range
+            frq = frq[range(n // 2)]  # one side frequency range
+            Y = np.fft.fft(y) / n  # fft computing and normalization
+            Y = Y[range(n // 2)]
+            attitudeFrequencyResponse = np.column_stack([frq, abs(Y)])
+            self.attitudeFrequencyResponse = Function(
+                attitudeFrequencyResponse,
+                "Frequency (Hz)",
+                "Attitude Angle Fourier Amplitude",
+            )
         # Static Margin
         self.staticMargin = self.rocket.staticMargin
 
@@ -3716,7 +3733,8 @@ class Flight:
         self.plotFluidMechanicsData()
 
         print("\n\nTrajectory Stability and Control Plots\n")
-        self.plotStabilityAndControlData()
+        if self.terminateOnRail == False:
+         self.plotStabilityAndControlData()
 
         return None
 
