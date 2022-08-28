@@ -1,0 +1,283 @@
+<?xml version='1.0' encoding='utf-8'?>
+<openrocket version="1.4" creator="OpenRocket 15.03">
+  <rocket>
+    <name>Rocket</name>
+    <motorconfiguration configid="bcb82022-f301-40de-8cae-e068b6c72e12"/>
+    <motorconfiguration configid="c872ec37-7f90-437c-9a46-d85ae9c25680"/>
+    <motorconfiguration configid="45097303-41ec-4952-8480-1aec9cbb95cd" default="true"/>
+    <referencetype>maximum</referencetype>
+
+    <subcomponents>
+      <stage>
+        <name>Sustainer</name>
+        <overridemass>24.757071532768</overridemass>
+        <overridecg>2.3114</overridecg>
+        <overridesubcomponents>true</overridesubcomponents>
+
+        <subcomponents>
+          <nosecone>
+            <name>Nose cone</name>
+            <overridemass>1.612</overridemass>
+            <overridesubcomponents>false</overridesubcomponents>
+            <finish>smooth</finish>
+            <material type="bulk" density="680.0">Cardboard</material>
+            <length>0.6687312</length>
+            <thickness>0.002</thickness>
+            <shape>haack</shape>
+            <shapeclipped>false</shapeclipped>
+            <shapeparameter>0.0</shapeparameter>
+            <aftradius>0.11137899999999999</aftradius>
+            <aftshoulderradius>0.0</aftshoulderradius>
+            <aftshoulderlength>0.0</aftshoulderlength>
+            <aftshoulderthickness>0.0</aftshoulderthickness>
+            <aftshouldercapped>false</aftshouldercapped>
+          </nosecone>
+
+          <bodytube>
+            <name>Fin Can</name>
+            <overridemass>3.056</overridemass>
+            <overridesubcomponents>false</overridesubcomponents>
+            <finish>smooth</finish>
+            <material type="bulk" density="680.0">Cardboard</material>
+            <length>3.2258</length>
+            <thickness>0.002</thickness>
+            <radius>auto</radius>
+            <motormount>
+              <ignitionevent>automatic</ignitionevent>
+              <ignitiondelay>0.0</ignitiondelay>
+              <overhang>0.0</overhang>
+              <motor configid="bcb82022-f301-40de-8cae-e068b6c72e12">
+                <manufacturer>TAMUSRT</manufacturer>
+                <digest>78c3a4a99e8a9f23471d80cde35aa4ac</digest>
+                <designation>N27</designation>
+                <diameter>0.0577</diameter>
+                <length>2.2918000000000003</length>
+                <delay>none</delay>
+              </motor>
+              <motor configid="c872ec37-7f90-437c-9a46-d85ae9c25680">
+                <manufacturer>TAMUSRT-30k</manufacturer>
+                <digest>61987aa8d66e09e7e9842c644c1ee006</digest>
+                <designation>N27-30k</designation>
+                <diameter>0.0577</diameter>
+                <length>2.2918000000000003</length>
+                <delay>none</delay>
+              </motor>
+              <motor configid="45097303-41ec-4952-8480-1aec9cbb95cd">
+                <manufacturer>AeroTech</manufacturer>
+                <digest>f097ce447c4666d6124670f2768d667a</digest>
+                <designation>N2000W</designation>
+                <diameter>0.098</diameter>
+                <length>1.046</length>
+                <delay>0.0</delay>
+              </motor>
+            </motormount>
+
+            <subcomponents>
+              <trapezoidfinset>
+                <name>Trapezoidal fin set</name>
+                <position type="absolute">3.4798</position>
+                <finish>smooth</finish>
+                <material type="bulk" density="680.0">Cardboard</material>
+                <fincount>3</fincount>
+                <rotation>0.0</rotation>
+                <thickness>0.0254</thickness>
+                <crosssection>airfoil</crosssection>
+                <cant>0.0</cant>
+                <filletradius>0.0</filletradius>
+                <filletmaterial type="bulk" density="680.0">Cardboard</filletmaterial>
+                <rootchord>0.30479999999999996</rootchord>
+                <tipchord>0.07619999999999999</tipchord>
+                <sweeplength>0.22352</sweeplength>
+                <height>0.2794</height>
+              </trapezoidfinset>
+
+              <parachute>
+                <name>Drogue</name>
+                <position type="top">0.0</position>
+                <packedlength>0.025</packedlength>
+                <packedradius>0.0125</packedradius>
+                <radialposition>0.0</radialposition>
+                <radialdirection>0.0</radialdirection>
+                <cd>2.2</cd>
+                <material type="surface" density="0.067">Ripstop nylon</material>
+                <deployevent>apogee</deployevent>
+                <deployaltitude>200.0</deployaltitude>
+                <deploydelay>1.0</deploydelay>
+                <diameter>2.032</diameter>
+                <linecount>6</linecount>
+                <linelength>0.3</linelength>
+                <linematerial type="line" density="0.0018">Elastic cord (round 2 mm, 1/16 in)</linematerial>
+              </parachute>
+
+              <parachute>
+                <name>Main</name>
+                <position type="top">0.0</position>
+                <packedlength>0.025</packedlength>
+                <packedradius>0.0125</packedradius>
+                <radialposition>0.0</radialposition>
+                <radialdirection>0.0</radialdirection>
+                <cd>auto</cd>
+                <material type="surface" density="0.067">Ripstop nylon</material>
+                <deployevent>altitude</deployevent>
+                <deployaltitude>304.8</deployaltitude>
+                <deploydelay>0.0</deploydelay>
+                <diameter>0.3</diameter>
+                <linecount>6</linecount>
+                <linelength>0.3</linelength>
+                <linematerial type="line" density="0.0018">Elastic cord (round 2 mm, 1/16 in)</linematerial>
+              </parachute>
+            </subcomponents>
+          </bodytube>
+
+          <transition>
+            <name>Transition</name>
+            <finish>smooth</finish>
+            <material type="bulk" density="680.0">Cardboard</material>
+            <length>0.23622</length>
+            <thickness>0.002</thickness>
+            <shape>ellipsoid</shape>
+            <shapeclipped>true</shapeclipped>
+            <foreradius>auto</foreradius>
+            <aftradius>0.073152</aftradius>
+            <foreshoulderradius>0.0</foreshoulderradius>
+            <foreshoulderlength>0.0</foreshoulderlength>
+            <foreshoulderthickness>0.0</foreshoulderthickness>
+            <foreshouldercapped>false</foreshouldercapped>
+            <aftshoulderradius>0.0</aftshoulderradius>
+            <aftshoulderlength>0.0</aftshoulderlength>
+            <aftshoulderthickness>0.0</aftshoulderthickness>
+            <aftshouldercapped>false</aftshouldercapped>
+          </transition>
+        </subcomponents>
+      </stage>
+    </subcomponents>
+  </rocket>
+
+  <simulations>
+    <simulation status="notsimulated">
+      <name>Simulation 1</name>
+      <simulator>RK4Simulator</simulator>
+      <calculator>BarrowmanCalculator</calculator>
+      <conditions>
+        <configid>bcb82022-f301-40de-8cae-e068b6c72e12</configid>
+        <launchrodlength>1.0</launchrodlength>
+        <launchrodangle>0.0</launchrodangle>
+        <launchroddirection>90.0</launchroddirection>
+        <windaverage>2.0</windaverage>
+        <windturbulence>0.1</windturbulence>
+        <launchaltitude>0.0</launchaltitude>
+        <launchlatitude>28.61</launchlatitude>
+        <launchlongitude>-80.6</launchlongitude>
+        <geodeticmethod>spherical</geodeticmethod>
+        <atmosphere model="isa"/>
+        <timestep>0.05</timestep>
+      </conditions>
+    </simulation>
+
+    <simulation status="outdated">
+      <name>Simulation 2</name>
+      <simulator>RK4Simulator</simulator>
+      <calculator>BarrowmanCalculator</calculator>
+      <conditions>
+        <configid>bcb82022-f301-40de-8cae-e068b6c72e12</configid>
+        <launchrodlength>1.0</launchrodlength>
+        <launchrodangle>0.0</launchrodangle>
+        <launchroddirection>90.0</launchroddirection>
+        <windaverage>2.0</windaverage>
+        <windturbulence>0.1</windturbulence>
+        <launchaltitude>0.0</launchaltitude>
+        <launchlatitude>28.61</launchlatitude>
+        <launchlongitude>-80.6</launchlongitude>
+        <geodeticmethod>spherical</geodeticmethod>
+        <atmosphere model="isa"/>
+        <timestep>0.05</timestep>
+      </conditions>
+      <flightdata maxaltitude="2759.2" maxvelocity="209.47" maxacceleration="44.007" maxmach="0.62029" timetoapogee="26.051" flighttime="123.6" groundhitvelocity="60.133" launchrodvelocity="9.161">
+      </flightdata>
+    </simulation>
+
+    <simulation status="notsimulated">
+      <name>Simulation 3</name>
+      <simulator>RK4Simulator</simulator>
+      <calculator>BarrowmanCalculator</calculator>
+      <conditions>
+        <configid>c872ec37-7f90-437c-9a46-d85ae9c25680</configid>
+        <launchrodlength>1.0</launchrodlength>
+        <launchrodangle>0.0</launchrodangle>
+        <launchroddirection>90.0</launchroddirection>
+        <windaverage>2.0</windaverage>
+        <windturbulence>0.1</windturbulence>
+        <launchaltitude>0.0</launchaltitude>
+        <launchlatitude>28.61</launchlatitude>
+        <launchlongitude>-80.6</launchlongitude>
+        <geodeticmethod>spherical</geodeticmethod>
+        <atmosphere model="isa"/>
+        <timestep>0.05</timestep>
+      </conditions>
+    </simulation>
+
+    <simulation status="outdated">
+      <name>Simulation 4</name>
+      <simulator>RK4Simulator</simulator>
+      <calculator>BarrowmanCalculator</calculator>
+      <conditions>
+        <configid>c872ec37-7f90-437c-9a46-d85ae9c25680</configid>
+        <launchrodlength>1.0</launchrodlength>
+        <launchrodangle>0.0</launchrodangle>
+        <launchroddirection>90.0</launchroddirection>
+        <windaverage>2.0</windaverage>
+        <windturbulence>0.1</windturbulence>
+        <launchaltitude>0.0</launchaltitude>
+        <launchlatitude>28.61</launchlatitude>
+        <launchlongitude>-80.6</launchlongitude>
+        <geodeticmethod>spherical</geodeticmethod>
+        <atmosphere model="isa"/>
+        <timestep>0.05</timestep>
+      </conditions>
+      <flightdata maxaltitude="5856.3" maxvelocity="316.52" maxacceleration="35.436" maxmach="0.95758" timetoapogee="38.171" flighttime="175.45" groundhitvelocity="38.07" launchrodvelocity="8.2438">
+      </flightdata>
+    </simulation>
+
+    <simulation status="outdated">
+      <name>Simulation 5</name>
+      <simulator>RK4Simulator</simulator>
+      <calculator>BarrowmanCalculator</calculator>
+      <conditions>
+        <configid>c872ec37-7f90-437c-9a46-d85ae9c25680</configid>
+        <launchrodlength>9.144</launchrodlength>
+        <launchrodangle>0.0</launchrodangle>
+        <launchroddirection>90.0</launchroddirection>
+        <windaverage>2.0</windaverage>
+        <windturbulence>0.1</windturbulence>
+        <launchaltitude>0.0</launchaltitude>
+        <launchlatitude>28.61</launchlatitude>
+        <launchlongitude>-80.6</launchlongitude>
+        <geodeticmethod>spherical</geodeticmethod>
+        <atmosphere model="isa"/>
+        <timestep>0.05</timestep>
+      </conditions>
+      <flightdata maxaltitude="5948.1" maxvelocity="321.45" maxacceleration="36.461" maxmach="0.9731" timetoapogee="38.201" flighttime="178.87" groundhitvelocity="37.532" launchrodvelocity="25.649">
+      </flightdata>
+    </simulation>
+
+    <simulation status="notsimulated">
+      <name>Simulation 6</name>
+      <simulator>RK4Simulator</simulator>
+      <calculator>BarrowmanCalculator</calculator>
+      <conditions>
+        <configid>45097303-41ec-4952-8480-1aec9cbb95cd</configid>
+        <launchrodlength>1.0</launchrodlength>
+        <launchrodangle>0.0</launchrodangle>
+        <launchroddirection>90.0</launchroddirection>
+        <windaverage>2.0</windaverage>
+        <windturbulence>0.1</windturbulence>
+        <launchaltitude>0.0</launchaltitude>
+        <launchlatitude>28.61</launchlatitude>
+        <launchlongitude>-80.6</launchlongitude>
+        <geodeticmethod>spherical</geodeticmethod>
+        <atmosphere model="isa"/>
+        <timestep>0.05</timestep>
+      </conditions>
+    </simulation>
+  </simulations>
+</openrocket>
