@@ -1,40 +1,23 @@
-from rocketpy import Environment, SolidMotor, Rocket
-import zipfile
-import xml.etree.ElementTree as ET
+from rocketpy import Environment, SolidMotor, Rocket, utilities, Flight
+import datetime
 
+# Import ork
+ork_file_path = 'data/lazarus/lazarus.ork'
+ork_xml_obj = utilities.import_openrocket(ork_file_path)
 
-ork_file_path = "data/lazarus/lazarus.ork"
-ork_root_path = ork_file_path[0:-4] + '-uncompressed'
+# Create environment
+simulation_number = 5
+Env = utilities.ork_create_environment(ork_xml_obj, simulation_number)
 
-with zipfile.ZipFile(ork_file_path,"r") as compressed_ork_file:
-    compressed_ork_file.extractall(ork_root_path)
+tomorrow = datetime.date.today() + datetime.timedelta(days=1)
+Env.setDate((tomorrow.year, tomorrow.month, tomorrow.day, 12))  # Hour given in UTC time
 
-with open(ork_root_path+"/rocket.ork", "r") as uncompressed_ork_file:
-    ork_xml_data = uncompressed_ork_file.read()
-
-openrocket = ET.fromstring(ork_xml_data)
-
-print(openrocket.tag)
-
-
-# environment conditions:
-simulations_list =  openrocket[1].findall('simulation')
-last_simulation = simulations_list[-1]
-ork_railLength = float(last_simulation.find("conditions").find("launchrodlength").text)
-ork_latitude = float(last_simulation.find("conditions").find("launchlatitude").text)
-ork_longitude = float(last_simulation.find("conditions").find("launchlongitude").text)
-ork_elevation= float(last_simulation.find("conditions").find("launchaltitude").text)
-
-
-Env = Environment(
-    railLength=ork_railLength, latitude=ork_latitude, longitude=ork_longitude, elevation=ork_elevation
-)
-
-# motor configuration
-# the OpenRocket motor data is a serialized Java ArrayList. I attempted to write code to deserialize
-# the arrayList but could not get it to work in time, so for now the motoro must remain hardcoded. For easier use,
-# I am using a default RocketPy example engine. 
-motor = SolidMotor(
+# Create Motor
+# I didn't have time to add motor functionality since the OpenRocket
+# motor files are in a serialized Java ArrayList. I attempted to deserialize
+# the motor data and failed by the time PRs were due. I have included a deserializer.py
+# file but it does not work. 
+Pro75M1670 = SolidMotor(
     thrustSource="data/motors/Cesaroni_M1670.eng",
     burnOut=3.9,
     grainNumber=5,
@@ -48,8 +31,13 @@ motor = SolidMotor(
     interpolationMethod="linear",
 )
 
-Calisto = Rocket(
-    motor=motor,
+# Create rocket
+# since intertia and drag curves cannot be extracted from OpenRocket,
+# it is best for users to manually define the Rocket Obj. 
+# Drag curves can be made from OpenRocket but not extracted from
+# an .ork file
+ork_rocket = Rocket(
+    motor=Pro75M1670,
     radius=127 / 2000,
     mass=19.197 - 2.956,
     inertiaI=6.60,
@@ -59,15 +47,24 @@ Calisto = Rocket(
     powerOffDrag="data/calisto/powerOffDragCurve.csv",
     powerOnDrag="data/calisto/powerOnDragCurve.csv",
 )
+ork_rocket.setRailButtons([0.2, -0.5])
 
-for subcomponent in openrocket[0].findall('subcomponents'):
-    print("1" + subcomponent.tag)
-    for stage in subcomponent.findall('stage'):
-        print("2" + stage.tag)
-        for stage_subcomponent in stage.findall('subcomponents'):
-            print("3" + stage_subcomponent.tag)
-            for geometry in stage_subcomponent:
-                print("4" + geometry.tag)
-                geometry_name = geometry.find("name").text
-                print("5" + geometry_name)
+# Add Aero Surfaces
+# The aero surfaces' distance to CM cannot be extracted from .ork files
+# and needs to be manually set by the user
+nose_distanceToCM = 0.71971
+fin_distanceToCM = -1.04956
+ork_rocket = utilities.ork_add_aero_surfaces(ork_rocket, ork_xml_obj, nose_distanceToCM, fin_distanceToCM)
 
+# openRocket does not have a standard method for defining tail cones
+# so users should define their tailcone separately
+Tail = ork_rocket.addTail(
+    topRadius=0.0635, bottomRadius=0.0435, length=0.060, distanceToCM=-1.194656
+)
+
+# Add parachutes
+ork_rocket = utilities.ork_add_parachutes(ork_rocket, ork_xml_obj, Env)
+
+#Test Flight
+TestFlight = Flight(rocket=ork_rocket, environment=Env, inclination=85, heading=0)
+TestFlight.allInfo()
