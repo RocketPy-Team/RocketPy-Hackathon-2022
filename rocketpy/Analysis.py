@@ -74,10 +74,10 @@ class Analysis:
             
             
         
-    def chute_radius_finder():
+    def chute_radius_finder(self):
         from numpy import pi
         desiredterminal = float(input('Enter desired landing velocity in m/s '))
-        mass = self.rocket.mass # find a way to make sure this calls correctly
+        mass = self.rocket.mass
         self.calculateDensityProfile()
         d = self.density(1)
     
@@ -103,5 +103,5 @@ class Analysis:
         radius = (area / pi)**(1/2)
     
         print("Estimated required radius: {:.6f} meters".format(radius))
-    
-    return Function(apogee, inputs="Mass (kg)", outputs="Estimated Apogee (m)")
+        
+        return radius
