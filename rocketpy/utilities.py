@@ -6,6 +6,7 @@ __license__ = "MIT"
 import numpy as np
 from scipy.integrate import solve_ivp
 from matplotlib import pyplot as plt
+from matplotlib.pyplot import cm
 
 from .Environment import Environment
 from .Function import Function
