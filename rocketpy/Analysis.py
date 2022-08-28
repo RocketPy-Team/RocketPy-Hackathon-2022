@@ -37,13 +37,28 @@ class Analysis:
         return Function(apogee, inputs="Mass (kg)", outputs="Estimated Apogee (m)")
         
         
-    def exit_velocity_by_mass(self, wind_v=-5):
-        og_mass = self.rocket.mass # immutable value creates different object unaffected by subsequent code
-        # Create version of flight that has variable mass
+    def rail_exit_velocity_by_mass(self, wind_v=-5):
+        self.env.setAtmosphericModel(type="CustomAtmosphere", wind_v=wind_v)
         def speed(mass):
-            self.env.setAtmosphericModel(type="CustomAtmosphere", wind_v=wind_v)
+            # self.rocket.mass = mass
             
-            self.rocket.mass = mass
+            # ^^^ In theory this could and should replace the variable_rocket definition
+            # but due to a bug could not be used; calisto drag curves are used below
+            # for demonstration purposes.
+            
+            # Most likely, some internal process is causing the rail exit velocity to
+            # be the same even for different masses. 
+            variable_rocket = Rocket(
+                motor=self.motor,
+                radius=self.rocket.radius,
+                mass=mass,
+                inertiaI=self.rocket.inertiaI,
+                inertiaZ=self.rocket.inertiaZ,
+                distanceRocketNozzle=self.rocket.distanceRocketNozzle,
+                distanceRocketPropellant=self.rocket.distanceRocketPropellant,
+                powerOffDrag="../data/calisto/powerOffDragCurve.csv",
+                powerOnDrag="../data/calisto/powerOnDragCurve.csv",
+            )
             
             test_flight = Flight(
                 rocket=self.rocket,
@@ -54,9 +69,7 @@ class Analysis:
             )
 
             return test_flight.outOfRailVelocity
-        
-        # restore original mass of rocket
-        self.rocket.mass = og_mass
+                
         return Function(speed, inputs="Mass (kg)", outputs="Out of Rail Speed (m/s)")
             
         
@@ -64,8 +77,7 @@ class Analysis:
         from numpy import pi
         desiredterminal = float(input('Enter desired landing velocity in m/s '))
         mass = self.rocket.mass
-        self.calculateDensityProfile()
-        d = self.density(1)
+        d = self.env.density(1)
     
         parachute_type = input("Enter parachute type (eg: 'toroidal' or 'custom') ")
     
@@ -86,23 +98,29 @@ class Analysis:
     
         area = desiredCdS / dragcoeff
     
-        radius = (area / pi)**(1/2)
+        radius = (2 * area) / pi # using formula from fruitychutes
     
         print("Estimated required radius: {:.6f} meters".format(radius))
         
         return radius
     
-    def snatchforce_calculator(self) :
-            density = self.env.density
-            CdS = 10.0
-            if CdS == True:
-                snatchforce = (1/2)* density * Flight.impactVelocity * CdS
-            else:
-                print ("you do not have a parachute defined!")
-            return(snatchforce)
+    def snatchforce_calculator(self, main_CdS):
+        """
+        Calculates the shock force of parachute deployment based on the CdS
+        and velocity while the parachute is deployed. Works only for main parachute,
+        does not account for drogue.
+
+        Args:
+            main_CdS (number): Drag coefficient times reference area of main chute.
+
+        Returns:
+            float: Shock force of main chute
+        """
+        density = self.env.density
+        return (1/2)* density * (self.flight.impactVelocity**2) * main_CdS
         
     
-    def CdS_finder_paramver(self, chutetype,ventedchute,oradius,iradius,customCd):
+    def CdS_finder(self, chutetype,ventedchute,oradius,iradius,customCd):
         from numpy import pi
         
         chutetypedict = {
