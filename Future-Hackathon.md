@@ -1,0 +1,3 @@
+# Future Hackathon Ideas
+- Simulate a Falcon 9 rocket
+- ...
