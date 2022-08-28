@@ -9,12 +9,11 @@ class Analysis:
         self.motor = self.rocket.Motor
         self.env = self.flight.Environment
         
-    def apogee_by_mass(self, flight: Flight):
+    def apogee_by_mass(self):
         """
         Returns a RocketPy Function that, for a given Flight configuration,
         estimates the apogee as a function of the dry mass of the rocket.
-            Parameters:
-                flight (Flight):    Flight object to provide mass-apogee analysis
+
             Returns:
                 RocketPy Function that provides predicted apogee as a function of dry mass
         """
@@ -35,8 +34,8 @@ class Analysis:
             test_flight = Flight(
                 rocket=variable_rocket,
                 environment=self.env,
-                inclination=flight.inclination,
-                heading=flight.heading,
+                inclination=self.flight.inclination,
+                heading=self.flight.heading,
                 terminateOnApogee=True,
             )
 
