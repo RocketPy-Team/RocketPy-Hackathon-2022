@@ -334,7 +334,7 @@ class Rocket:
         # Return self
         return self
 
-    def addTail(self, topRadius, bottomRadius, length, distanceToCM,format,n=0):
+    def addTail(self, topRadius, bottomRadius, length, distanceToCM):
         """Create a new tail or rocket diameter change, storing its
         parameters as part of the aerodynamicSurfaces list. Its
         parameters are the axial position along the rocket and its
@@ -356,12 +356,6 @@ class Rocket:
             cone. Consider the point belonging to the tail which is
             closest to the unloaded center of mass to calculate
             distance.
-        format: string 
-            Tail geometric format, varying between conical,circular-arc, eliptical and parabolic PS (power series).
-        n: int, float, optional
-            Tail caracterisc only for parabolical formats, varying from 0 to 1 for Power Series. For other formats, leave n=0.
-            Daefault is zero
-            
         Returns
         -------
         cl : Function
@@ -380,40 +374,13 @@ class Rocket:
         # Retrieve reference radius
         rref = self.radius
 
-        #Separate cp position formula by format
-        if format == "conical" :
-
-            # Calculate cp position relative to cm
-            if distanceToCM < 0:
-                cpz = distanceToCM - (length / 3) * (1 + (1 - r) / (1 - r**2))
-            else:
-                cpz = distanceToCM + (length / 3) * (1 + (1 - r) / (1 - r**2))
-        elif format == "circular arc":
-            if distanceToCM < 0:
-                cpz= distanceToCM - ((length-(topRadius/6)-(bottomRadius^3/topRadius^2))/(1-(bottomRadius/topRadius)^2))
-            else:
-                cpz= distanceToCM + ((length-(topRadius/6)-(bottomRadius^3/topRadius^2))/(1-(bottomRadius/topRadius)^2))
-        elif format == "eliptical":
-            #calculate the volume
-            L= length *(topRadius**2/(bottomRadius**2-topRadius**2)**(1/2))
-            v= 2/3 *((topRadius**2 *length)-(bottomRadius**2*(L-length)))
-
-            #Calculate cp position relative to cm
-            if distanceToCM < 0:
-                cpz= distanceToCM - ((length-(v/np.pi*bottomRadius**2))/(1-(bottomRadius/topRadius)**2))
-            else:
-                cpz= distanceToCM + ((length-(v/np.pi*bottomRadius**2))/(1-(bottomRadius/topRadius)**2))
-        elif format == "parabolic PS":
-            # calculate the volume
-            L= (topRadius/bottomRadius *length**n)**(1/n)
-            v = (np.pi/3 )* (topRadius**2 *L)
-            if distanceToCM < 0:
-                cpz= distanceToCM -  ((length-(v/np.pi*bottomRadius**2))/(1-(bottomRadius/topRadius)**2))
-            else:
-                cpz= distanceToCM + ((length-(v/np.pi*bottomRadius**2))/(1-(bottomRadius/topRadius)**2))
+        # Calculate cp position relative to cm
+        if distanceToCM < 0:
+            cpz = distanceToCM - (length / 3) * (1 + (1 - r) / (1 - r**2))
+        else:
+            cpz = distanceToCM + (length / 3) * (1 + (1 - r) / (1 - r**2))
 
         # Calculate clalpha
-        # clalpha não altera com o formato da cauda para voo subsônico, então assim como das ogivas, a sua fórmula se mantém a mesa
         clalpha = -2 * (1 - r ** (-2)) * (topRadius / rref) ** 2
         cl = Function(
             lambda alpha, mach: clalpha * alpha,
