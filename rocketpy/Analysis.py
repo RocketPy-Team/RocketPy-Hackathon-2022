@@ -17,22 +17,13 @@ class Analysis:
             Returns:
                 RocketPy Function that provides predicted apogee as a function of dry mass
         """
-        # Create version of flight that has ambigious mass
+        og_mass = self.rocket.mass # immutable value creates different object unaffected by subsequent code
+        # Create version of flight that has variable mass
         def apogee(mass):
-            variable_rocket = Rocket(
-                motor = self.motor,
-                radius = self.rocket.radius,
-                mass = mass,
-                inertiaI = self.rocket.inertiaI,
-                inertiaZ = self.rocket.inertiaZ,
-                distanceRocketNozzle = self.rocket.distanceRocketNozzle,
-                distanceRocketPropellant = self.rocket.distanceRocketPropellant,
-                powerOffDrag = 0.5,
-                powerOnDrag = 0.5
-            )
+            self.rocket.mass = mass
 
             test_flight = Flight(
-                rocket=variable_rocket,
+                rocket=self.rocket,
                 environment=self.env,
                 inclination=self.flight.inclination,
                 heading=self.flight.heading,
@@ -41,27 +32,21 @@ class Analysis:
 
             return test_flight.apogee
         
+        # restore original mass of rocket
+        self.rocket.mass = og_mass
         return Function(apogee, inputs="Mass (kg)", outputs="Estimated Apogee (m)")
         
         
     def exit_velocity_by_mass(self, wind_v=-5):
+        og_mass = self.rocket.mass # immutable value creates different object unaffected by subsequent code
+        # Create version of flight that has variable mass
         def speed(mass):
             self.env.setAtmosphericModel(type="CustomAtmosphere", wind_v=wind_v)
             
-            variable_rocket = Rocket(
-                motor = self.motor,
-                radius = self.rocket.radius,
-                mass = mass,
-                inertiaI = self.rocket.inertiaI,
-                inertiaZ = self.rocket.inertiaZ,
-                distanceRocketNozzle = self.rocket.distanceRocketNozzle,
-                distanceRocketPropellant = self.rocket.distanceRocketPropellant,
-                powerOffDrag = 0.5,
-                powerOnDrag = 0.5
-            )
+            self.rocket.mass = mass
             
             test_flight = Flight(
-                rocket=variable_rocket,
+                rocket=self.rocket,
                 environment=self.env,
                 inclination=self.flight.inclination,
                 heading=self.flight.heading,
@@ -70,6 +55,8 @@ class Analysis:
 
             return test_flight.outOfRailVelocity
         
+        # restore original mass of rocket
+        self.rocket.mass = og_mass
         return Function(speed, inputs="Mass (kg)", outputs="Out of Rail Speed (m/s)")
             
         
