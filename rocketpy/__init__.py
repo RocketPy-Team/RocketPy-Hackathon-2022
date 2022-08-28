@@ -27,4 +27,5 @@ from .Flight import Flight
 from .Function import Function
 from .Motor import HybridMotor, SolidMotor
 from .Rocket import Rocket
+from .Dispersion import Dispersion
 from .utilities import *
