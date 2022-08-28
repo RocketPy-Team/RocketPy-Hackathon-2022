@@ -5,9 +5,9 @@ from .Rocket import Rocket
 class Analysis:
     def __init__(self, flight: Flight):
         self.flight = flight
-        self.rocket = self.flight.Rocket
-        self.motor = self.rocket.Motor
-        self.env = self.flight.Environment
+        self.rocket = self.flight.rocket
+        self.motor = self.rocket.motor
+        self.env = self.flight.env
         
     def apogee_by_mass(self):
         """
