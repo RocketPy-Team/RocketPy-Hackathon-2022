@@ -5,6 +5,7 @@ __copyright__ = "Copyright 20XX, RocketPy Team"
 __license__ = "MIT"
 
 
+from asyncio.windows_events import NULL
 from collections import namedtuple
 from inspect import getsourcelines
 
@@ -698,6 +699,94 @@ class Rocket:
 
         # Return self
         return self.aerodynamicSurfaces[-1]
+
+    def finsOptimization(self, n, spanMin, rootMin, tipMin, spanMax, rootMax, tipMax, paces, desiredStaticMargin, distanceToCM):
+        """Calculates the most optimized trapezoidal fin geometry parameters.
+        The method simulates all combinations of values within the given parameters
+        and returns the best compromise between the desired static margin and smaller 
+        fin dimensions.
+
+        Parameters:
+        ----------
+        n : int
+            Number of fins.
+        spanMin : int, float
+            Lower range to span dimension.
+        rootMin : int, float
+            Lower range to root dimension.
+        tipMin : int, float
+            Lower range to tip dimension.
+        spanMax : int, float
+            Maximum range to span dimension.
+        rootMax : int, float
+            Maximum range to root dimension.
+        tipMax : int, float
+            Maximum range to tip dimension.
+        paces : int, float
+            Number increased on the fin parameters in each iteration.
+        desiredStaticMargin : int, float
+            Static margin required.
+        distanceToCM : int, float
+            Distance between rocket unloaded center of mass and nearest fin point to nosecone.
+
+        Returns:
+        ----------
+        results: dictionary
+            Dictionary containing the fin dimensions, the initial and final static margins and maximum merit.
+        """
+
+        fins = NULL
+
+        for i in self.aerodynamicSurfaces:
+            if i['name'] == 'Fins':
+                fins = i
+        
+        def MeritFunction(staticMargin, desiredStaticMargin, areaFins):
+            sigma = 0.2
+            return (np.exp(-1*(((staticMargin - desiredStaticMargin)/(2*sigma))**2)))/areaFins
+
+        span = spanMin
+        root = rootMin
+        tip = tipMin
+        highestMerit = 0
+        self.aerodynamicSurfaces
+
+        while span <= spanMax:
+            while root <= rootMax:
+                while tip <= tipMax:
+                    self.addFins(n = n,span= span, rootChord = root, tipChord = tip, distanceToCM = distanceToCM, airfoil=False)
+                    staticMargin = self.staticMargin(0)
+                    afterBurnStaticMargin  = self.staticMargin(12)
+                    areaFins = (root + tip) * (span / 2)
+                    merit = MeritFunction(staticMargin, desiredStaticMargin, areaFins)
+
+                    if merit > highestMerit:
+                        highestMerit = merit
+                        highestMargin = staticMargin
+                        highestAfterBurnMargin = afterBurnStaticMargin
+                        spanFinal = span
+                        rootFinal = root
+                        tipFinal = tip
+
+                    self.aerodynamicSurfaces.pop(-1)
+
+                    tip += paces
+
+                root += paces
+                tip = tipMin
+
+            span += paces
+            root = rootMin
+
+        results = {"span": spanFinal, "rootChord": rootFinal, "tipChord": tipFinal, "Merit": highestMerit, "Margin": highestMargin, "AfterBurnMargin": highestAfterBurnMargin}
+
+        if fins != NULL:
+            for i in self.aerodynamicSurfaces:
+                if i['name'] == 'Fins':
+                    self.aerodynamicSurfaces.remove(i)
+                    self.aerodynamicSurfaces.append(fins)
+
+        return results
 
     def addParachute(
         self, name, CdS, trigger, samplingRate=100, lag=0, noise=(0, 0, 0)
