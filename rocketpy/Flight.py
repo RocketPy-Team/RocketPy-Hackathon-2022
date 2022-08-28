@@ -6,8 +6,10 @@ __author__ = (
 __copyright__ = "Copyright 20XX, RocketPy Team"
 __license__ = "MIT"
 
+import os
 import math
 import time
+from tokenize import String
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -516,6 +518,8 @@ class Flight:
         heading=90,
         initialSolution=None,
         terminateOnApogee=False,
+        saveImagesPng=False,
+        saveImagesPdf=False,
         maxTime=600,
         maxTimeStep=np.inf,
         minTimeStep=0,
@@ -603,7 +607,8 @@ class Flight:
         self.initialSolution = initialSolution
         self.timeOvershoot = timeOvershoot
         self.terminateOnApogee = terminateOnApogee
-
+        self.saveImagesPng = saveImagesPng
+        self.saveImagesPdf = saveImagesPdf
         # Modifying Rail Length for a better out of rail condition
         upperRButton = max(self.rocket.railButtons[0])
         lowerRButton = min(self.rocket.railButtons[0])
@@ -2578,6 +2583,7 @@ class Flight:
         ax1.set_xlim3d([minXY, maxXY])
         ax1.view_init(15, 45)
         plt.show()
+        self.saveImages("Flight Trajectory")
 
         return None
 
@@ -2657,6 +2663,7 @@ class Flight:
 
         plt.subplots_adjust(hspace=0.5)
         plt.show()
+        self.saveImages("LinearKinematicsData")
         return None
 
     def plotAttitudeData(self):
@@ -2723,6 +2730,8 @@ class Flight:
 
         plt.subplots_adjust(hspace=0.5)
         plt.show()
+        self.saveImages("AttitudeData")
+
 
         return None
 
@@ -2778,7 +2787,7 @@ class Flight:
 
         plt.subplots_adjust(hspace=0.5)
         plt.show()
-
+        self.saveImages("FlightPathAngleData")
         return None
 
     def plotAngularKinematicsData(self):
@@ -2863,6 +2872,7 @@ class Flight:
 
         plt.subplots_adjust(hspace=0.5)
         plt.show()
+        self.saveImages("AngularKinematicsData")
 
         return None
 
@@ -2936,6 +2946,10 @@ class Flight:
 
         plt.subplots_adjust(hspace=0.5)
         plt.show()
+        if self.saveImagesPng is True:
+            plt.savefig("TrajectoryForceData.png")
+        if self.saveImagesPdf is True:
+            plt.savefig("TrajectoryForceData.pdf")
 
         # Aerodynamic force and moment plots
         fig7 = plt.figure(figsize=(9, 12))
@@ -2994,6 +3008,7 @@ class Flight:
 
         plt.subplots_adjust(hspace=0.5)
         plt.show()
+        self.saveImages("TrajectoryForceData")
 
         return None
 
@@ -3087,6 +3102,7 @@ class Flight:
 
         plt.subplots_adjust(hspace=1)
         plt.show()
+        self.saveImages("EnergyData")
 
         return None
 
@@ -3163,7 +3179,7 @@ class Flight:
 
         plt.subplots_adjust(hspace=0.5)
         plt.show()
-
+        self.saveImages("FluidMechanicsData")
         return None
 
     def calculateFinFlutterAnalysis(self, finThickness, shearModulus):
@@ -3387,6 +3403,7 @@ class Flight:
 
         plt.subplots_adjust(hspace=0.5)
         plt.show()
+        self.saveImages("StabilityAndControlData")
 
         return None
 
@@ -3424,6 +3441,7 @@ class Flight:
             ax1.grid()
 
             plt.show()
+            self.saveImages("PressureSignals")
 
         else:
             for parachute in self.rocket.parachutes:
@@ -3786,6 +3804,16 @@ class Flight:
         while i < len(nodeList) - 1:
             yield i, nodeList[i]
             i += 1
+
+    def saveImages(self, name):
+        if isinstance(self.saveImagesPng, str):
+            plt.savefig(os.path.join(self.saveImagesPng, name+".png"))
+        elif self.saveImagesPng is True:
+            plt.savefig(name+".png")
+        elif isinstance(self.saveImagesPdf, str):
+            plt.savefig(os.path.join(self.saveImagesPdf, name+".pdf"))
+        elif self.saveImagesPdf is True:
+            plt.savefig(name+".pdf")
 
     class FlightPhases:
         def __init__(self, init_list=[]):
