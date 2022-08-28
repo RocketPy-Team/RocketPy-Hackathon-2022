@@ -690,6 +690,16 @@ class Rocket:
             "cl": cl,
             "roll parameters": rollParameters,
             "name": "Fins",
+            'addFins parameters': {
+                'n': n,
+                'span': span,
+                'rootChord': rootChord,
+                'tipChord': tipChord,
+                'distanceToCM': distanceToCM,
+                'radius': radius,
+                'cantAngle': cantAngle,
+                'airfoil': airfoil,
+            },
         }
         self.aerodynamicSurfaces.append(fin)
 
@@ -960,8 +970,37 @@ class Rocket:
             + "{:.3f}".format(self.centerOfMass(0))
             + " m"
         )
-        print("\nAerodynamic Components Parameters")
-        print("Currently not implemented.")
+
+        # Print Aerodynamic Components Information
+        print("\nAerodynamic Components")
+        print(self.aerodynamicSurfaces)
+        for index, surface in enumerate(self.aerodynamicSurfaces):
+            # Get aerodynamic surface prefix
+            # If Surface has a name, print it alongside the index
+            if 'name' in surface:
+                name = surface['name']
+                prefix = f"\nAerodynamic Surface {index} \"{name}\" parameters"
+            else:
+                prefix = f"\nAerodynamic Surface {index} parameters"
+            print(prefix)
+
+            # Print possible parameters
+            if 'cp' in surface:
+                print(f"Center of Pressure Location: {surface['cp']}")
+            if 'cl' in surface:
+                print(f"Coefficient of Lift:")
+                surface['cl']()
+            
+            # Print parameters specific to fins
+            if 'addFins parameters' in surface:
+                parameters = surface['addFins parameters']
+                print(f"Number of Fins: {parameters['n']}")
+                print(f"Fin Span (m): {parameters['span']}")
+                print(f"Fin Root Chord (m): {parameters['rootChord']}")
+                print(f"Fin Tip Chord (m): {parameters['tipChord']}")
+                print(f"Fin Distance from Fin Leading Edge Geometric Center to Rocket Unloaded Center of Mass (m): {parameters['distanceToCM']}")
+                print(f"Fin Root Radius from Center of Rocket (m): {parameters['radius']}")
+                print(f"Fin Cant Angle with Respect to Rocket Centerline(deg): {parameters['cantAngle']}")
 
         # Print rocket aerodynamics quantities
         print("\nAerodynamics Lift Coefficient Derivatives")
