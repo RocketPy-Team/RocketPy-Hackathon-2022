@@ -699,6 +699,48 @@ class Rocket:
         # Return self
         return self.aerodynamicSurfaces[-1]
 
+    def finsOptimization(self, n, spanMin, rootMin, tipMin, spanMax, rootMax, tipMax, paces, desiredStaticMargin, UnloadedRocket_CM_position, Fins_position):
+
+        def MeritFunction(staticMargin, desiredStaticMargin, areaFins):
+            sigma = 0.2
+            return (np.exp(-1*(((staticMargin - desiredStaticMargin)/(2*sigma))**2)))/areaFins
+
+        span = spanMin
+        root = rootMin
+        tip = tipMin
+        highestMerit = 0
+
+        while span <= spanMax:
+            while root <= rootMax:
+                while tip <= tipMax:
+                    self.addFins(n = n,span= span, rootChord = root, tipChord = tip, distanceToCM = (UnloadedRocket_CM_position - Fins_position), airfoil=False)
+                    staticMargin = self.staticMargin(0)
+                    afterBurnStaticMargin  = self.staticMargin(12)
+                    areaFins = (root + tip) * (span / 2)
+                    merit = MeritFunction(staticMargin, desiredStaticMargin, areaFins)
+
+                    if merit > highestMerit:
+                        highestMerit = merit
+                        highestMargin = staticMargin
+                        highestAfterBurnMargin = afterBurnStaticMargin
+                        spanFinal = span
+                        rootFinal = root
+                        tipFinal = tip
+
+                    self.aerodynamicSurfaces.pop(-1)
+
+                    tip += paces
+
+                root += paces
+                tip = tipMin
+
+            span += paces
+            root = rootMin
+
+        results = {"span": spanFinal, "rootChord": rootFinal, "tipChord": tipFinal, "Merit": highestMerit, "Margin": highestMargin, "AfterBurnMargin": highestAfterBurnMargin}
+
+        return results
+
     def addParachute(
         self, name, CdS, trigger, samplingRate=100, lag=0, noise=(0, 0, 0)
     ):
