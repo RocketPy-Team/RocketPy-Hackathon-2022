@@ -8,6 +8,7 @@ import bisect
 import warnings
 from collections import defaultdict
 
+import os
 import ipywidgets as widgets
 import matplotlib.ticker as mtick
 import netCDF4
@@ -62,6 +63,8 @@ class EnvironmentAnalysis:
         longitude,
         start_hour=0,
         end_hour=24,
+        saveImagesPng=False,
+        saveImagesPdf=False,
         surfaceDataFile=None,
         pressureLevelDataFile=None,
         timezone=None,
@@ -116,6 +119,8 @@ class EnvironmentAnalysis:
         self.surfaceDataFile = surfaceDataFile
         self.pressureLevelDataFile = pressureLevelDataFile
         self.preferred_timezone = timezone
+        self.saveImagesPng = saveImagesPng
+        self.saveImagesPdf = saveImagesPdf
 
         # Manage units and timezones
         self.__init_data_parsing_units()
@@ -1185,6 +1190,7 @@ class EnvironmentAnalysis:
         plt.title("Wind Gust Speed Distribution")
         plt.legend()
         plt.show()
+        self.saveImages("WindGustSpeedDistribution")
 
         return None
 
@@ -1239,6 +1245,7 @@ class EnvironmentAnalysis:
         plt.title("Sustained Surface Wind Speed Distribution")
         plt.legend()
         plt.show()
+        self.saveImages("SustainedSurfaceWindSpeedDistribution")
 
         return None
 
@@ -1321,6 +1328,7 @@ class EnvironmentAnalysis:
         plt.grid(alpha=0.25)
         plt.legend()
         plt.show()
+        self.saveImages("AverageTemperatureAlongDay")
 
     def calculate_average_sustained_surface10m_wind_along_day(self):
         """Computes average sustained wind speed progression throughout the
@@ -1422,6 +1430,7 @@ class EnvironmentAnalysis:
         plt.grid(alpha=0.25)
         plt.legend()
         plt.show()
+        self.saveImages("AverageSustainedSurfaceWindSpeedAlongDay")
 
     def calculate_average_sustained_surface100m_wind_along_day(self):
         """Computes average sustained wind speed progression throughout the
@@ -1512,6 +1521,7 @@ class EnvironmentAnalysis:
         plt.grid(alpha=0.25)
         plt.legend()
         plt.show()
+        self.saveImages("Average100mWindSpeedAlongDay")
 
     def plot_average_wind_speed_profile(self, SAcup_altitude_constraints=False):
         """Average wind speed for all datetimes available."""
@@ -1585,6 +1595,7 @@ class EnvironmentAnalysis:
         plt.title("Average Wind Speed Profile")
         plt.legend()
         plt.show()
+        self.saveImages("AverageWindSpeedProfile")
 
     def process_wind_speed_and_direction_data_for_average_day(self):
         """Process the wind_speed and wind_direction data to generate lists of all the wind_speeds recorded
@@ -1714,6 +1725,7 @@ class EnvironmentAnalysis:
         plt.title("Average Pressure Profile")
         plt.legend()
         plt.show()
+        self.saveImages("AveragePressureProfile")
 
     @staticmethod
     def plot_wind_rose(
@@ -1779,6 +1791,10 @@ class EnvironmentAnalysis:
             fig=fig,
         )
         plt.show()
+        if self.saveImagesPng is True:
+            plt.savefig("WindRoseofanAverageDaySpecificHour", format="png")
+        if self.saveImagesPdf is True:
+            plt.savefig("WindRoseofanAverageDaySpecificHour", format="pdf")
 
     def plot_average_day_wind_rose_all_hours(self):
         """Plot windroses for all hours of a day, in a grid like plot."""
@@ -2545,3 +2561,13 @@ class EnvironmentAnalysis:
         print(
             f"Percentage of Days Without Clouds: {100*self.percentage_of_days_with_no_cloud_coverage:.1f} %"
         )
+
+    def saveImages(self, name):
+        if isinstance(self.saveImagesPng, str):
+            plt.savefig(os.path.join(self.saveImagesPng, name+".png"))
+        elif self.saveImagesPng is True:
+            plt.savefig(name+".png")
+        elif isinstance(self.saveImagesPdf, str):
+            plt.savefig(os.path.join(self.saveImagesPdf, name+".pdf"))
+        elif self.saveImagesPdf is True:
+            plt.savefig(name+".pdf")

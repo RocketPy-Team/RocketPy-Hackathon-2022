@@ -11,6 +11,7 @@ import re
 import warnings
 from datetime import datetime, timedelta
 
+import os
 import matplotlib.pyplot as plt
 import numpy as np
 import pytz
@@ -300,6 +301,8 @@ class Environment:
         elevation=0,
         datum="SIRGAS2000",
         timeZone="UTC",
+        saveImagesPng=False,
+        saveImagesPdf=False,
     ):
         """Initialize Environment class, saving launch rail length,
         launch date, location coordinates and elevation. Note that
@@ -364,6 +367,9 @@ class Environment:
             self.date = None
             self.localDate = None
             self.timeZone = None
+
+        self.saveImagesPng = saveImagesPng
+        self.saveImagesPdf = saveImagesPdf
 
         # Initialize constants
         self.earthRadius = 6.3781 * (10**6)
@@ -2972,7 +2978,7 @@ class Environment:
 
         plt.subplots_adjust(wspace=0.5)
         plt.show()
-
+        self.saveImages("AtmosphericModelPlots")
     def allInfo(self):
         """Prints out all data and graphs available about the Environment.
 
@@ -3208,6 +3214,7 @@ class Environment:
         # Display plot
         plt.subplots_adjust(wspace=0.5, hspace=0.3)
         plt.show()
+        self.saveImages("EnsembleMembersComparison")
 
         # Clean up
         self.selectEnsembleMember(currentMember)
@@ -3675,3 +3682,13 @@ class Environment:
         print("Gravity acceleration at launch site: Still not implemented :(")
 
         return None
+    
+    def saveImages(self, name):
+        if isinstance(self.saveImagesPng, str):
+            plt.savefig(os.path.join(self.saveImagesPng, name+".png"))
+        elif self.saveImagesPng is True:
+            plt.savefig(name+".png")
+        elif isinstance(self.saveImagesPdf, str):
+            plt.savefig(os.path.join(self.saveImagesPdf, name+".pdf"))
+        elif self.saveImagesPdf is True:
+            plt.savefig(name+".pdf")
