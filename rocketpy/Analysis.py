@@ -72,7 +72,6 @@ class Analysis:
         
         return Function(speed, inputs="Mass (kg)", outputs="Out of Rail Speed (m/s)")
             
-            
         
     def chute_radius_finder(self):
         from numpy import pi
@@ -105,3 +104,49 @@ class Analysis:
         print("Estimated required radius: {:.6f} meters".format(radius))
         
         return radius
+    
+    def snatchforce_calculator(self) :
+            density = self.env.density
+            CdS = 10.0
+            if CdS == True:
+                snatchforce = (1/2)* density * Flight.impactVelocity * CdS
+            else:
+                print ("you do not have a parachute defined!")
+            return(snatchforce)
+        
+    
+    def CdS_finder_paramver(self, chutetype,ventedchute,oradius,iradius,customCd):
+        from numpy import pi
+        
+        chutetypedict = {
+            'flat' : [0.75,0.80],
+            'conical' : [0.75,0.90],
+            'biconical' : [0.75,0.92],
+            'triconical' : [0.80,0.96],
+            'polyconical' : [0.80,0.96],
+            'extended skirt' : [0.78,0.87],
+            'skirt' : [0.78,0.87],
+            'hemisphere' : [0.62,0.77],
+            'guide surface' : [0.28,0.42],
+            'annular' : [0.85,0.95],
+        }
+            
+        if (chutetype not in chutetypedict.keys()) and ventedchute.lower() == 'n':
+            CdShigh = (oradius**2 * pi) * customCd
+            CdSlow = (oradius**2 * pi) * customCd
+        elif chutetype not in chutetypedict.keys() and ventedchute.lower() == 'y':
+            CdShigh = ((oradius**2 * pi)-(iradius**2 * pi)) * customCd
+            CdSlow = ((oradius**2 * pi)-(iradius**2 * pi)) * customCd
+        elif ventedchute.lower() == 'n':
+            CdShigh = (oradius**2 * pi) * chutetypedict[chutetype.lower()][1]
+            CdSlow = (oradius**2 * pi) * chutetypedict[chutetype.lower()][0]
+        elif ventedchute.lower() == 'y':
+            CdShigh = ((oradius**2 * pi)-(iradius**2 * pi)) * chutetypedict[chutetype.lower()][1]
+            CdSlow = ((oradius**2 * pi)-(iradius**2 * pi)) * chutetypedict[chutetype.lower()][0]
+        
+        meanCdS = (CdShigh+CdSlow)/2    
+        
+        print('With your chute configuradtion, the CdS will be about {:.6f} maximum'.format(CdShigh))
+        print('and {:.6f} minimum'.format(CdSlow))
+        print('Mean CdS = {:.6}'.format(meanCdS))
+        return(CdShigh,CdSlow,meanCdS)
