@@ -27,8 +27,8 @@ class Analysis:
                 inertiaZ = self.rocket.inertiaZ,
                 distanceRocketNozzle = self.rocket.distanceRocketNozzle,
                 distanceRocketPropellant = self.rocket.distanceRocketPropellant,
-                powerOffDrag = 'idk', # FIX !!!!!!!!!!
-                powerOnDrag = 'idk' # FIX !!!!!!!!!!
+                powerOffDrag = 0.5,
+                powerOnDrag = 0.5
             )
 
             test_flight = Flight(
