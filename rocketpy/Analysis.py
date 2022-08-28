@@ -42,6 +42,36 @@ class Analysis:
             return test_flight.apogee
         
         
+    def exit_velocity_by_mass(self, wind_v=-5):
+        def speed(mass):
+            self.env.setAtmosphericModel(type="CustomAtmosphere", wind_v=wind_v)
+            
+            variable_rocket = Rocket(
+                motor = self.motor,
+                radius = self.rocket.radius,
+                mass = mass,
+                inertiaI = self.rocket.inertiaI,
+                inertiaZ = self.rocket.inertiaZ,
+                distanceRocketNozzle = self.rocket.distanceRocketNozzle,
+                distanceRocketPropellant = self.rocket.distanceRocketPropellant,
+                powerOffDrag = 0.5,
+                powerOnDrag = 0.5
+            )
+            
+            test_flight = Flight(
+                rocket=variable_rocket,
+                environment=self.env,
+                inclination=self.flight.inclination,
+                heading=self.flight.heading,
+                terminateOnApogee=True,
+            )
+
+            return test_flight.outOfRailVelocity
+        
+        return Function(speed, inputs="Mass (kg)", outputs="Out of Rail Speed (m/s)")
+            
+            
+        
     def chute_radius_finder():
         from numpy import pi
         desiredterminal = float(input('Enter desired landing velocity in m/s '))
