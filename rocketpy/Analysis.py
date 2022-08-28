@@ -41,6 +41,8 @@ class Analysis:
 
             return test_flight.apogee
         
+        return Function(apogee, inputs="Mass (kg)", outputs="Estimated Apogee (m)")
+        
         
     def exit_velocity_by_mass(self, wind_v=-5):
         def speed(mass):
