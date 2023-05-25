@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pytz
 import requests
+import streamlit as st
 
 try:
     import netCDF4
@@ -366,7 +367,7 @@ class Environment:
             self.timeZone = None
 
         # Initialize constants
-        self.earthRadius = 6.3781 * (10**6)
+        self.earthRadius = 6.3781 * (10 ** 6)
         self.airGasConstant = 287.05287  # in J/K/Kg
 
         # Initialize atmosphere
@@ -1978,7 +1979,7 @@ class Environment:
         windV = ((y2 - y) / (y2 - y1)) * f_x_y1 + ((y - y1) / (y2 - y1)) * f_x_y2
 
         # Determine wind speed, heading and direction
-        windSpeed = np.sqrt(windU**2 + windV**2)
+        windSpeed = np.sqrt(windU ** 2 + windV ** 2)
         windHeading = np.arctan2(windU, windV) * (180 / np.pi) % 360
         windDirection = (windHeading - 180) % 360
 
@@ -2395,7 +2396,7 @@ class Environment:
         windV = ((y2 - y) / (y2 - y1)) * f_x_y1 + ((y - y1) / (y2 - y1)) * f_x_y2
 
         # Determine wind speed, heading and direction
-        windSpeed = np.sqrt(windU**2 + windV**2)
+        windSpeed = np.sqrt(windU ** 2 + windV ** 2)
         windHeading = np.arctan2(windU, windV) * (180 / np.pi) % 360
         windDirection = (windHeading - 180) % 360
 
@@ -2973,6 +2974,69 @@ class Environment:
         plt.subplots_adjust(wspace=0.5)
         plt.show()
 
+    def streamlitInfo(self):
+        """Prints most important data and graphs available about the
+        Environment in streamlit interface.
+
+        Parameters
+        ----------
+        None
+
+        Return
+        ------
+        None
+        """
+
+        # Plot graphs
+        print("\n\nAtmospheric Model Plots")
+        # Create height grid
+        grid = np.linspace(self.elevation, self.maxExpectedHeight)
+
+        # Create figure
+        plt.figure(figsize=(9, 4.5))
+
+        # Create wind speed and wind direction subplot
+        ax1 = plt.subplot(121)
+        ax1.plot(
+            [self.windSpeed(i) for i in grid], grid, "#ff7f0e", label="Speed of Sound"
+        )
+        ax1.set_xlabel("Wind Speed (m/s)", color="#ff7f0e")
+        ax1.tick_params("x", colors="#ff7f0e")
+        ax1up = ax1.twiny()
+        ax1up.plot(
+            [self.windDirection(i) for i in grid],
+            grid,
+            color="#1f77b4",
+            label="Density",
+        )
+        ax1up.set_xlabel("Wind Direction (°)", color="#1f77b4")
+        ax1up.tick_params("x", colors="#1f77b4")
+        ax1up.set_xlim(0, 360)
+        ax1.set_ylabel("Height Above Sea Level (m)")
+        ax1.grid(True)
+
+        # Create density and speed of sound subplot
+        ax2 = plt.subplot(122)
+        ax2.plot(
+            [self.speedOfSound(i) for i in grid],
+            grid,
+            "#ff7f0e",
+            label="Speed of Sound",
+        )
+        ax2.set_xlabel("Speed of Sound (m/s)", color="#ff7f0e")
+        ax2.tick_params("x", colors="#ff7f0e")
+        ax2up = ax2.twiny()
+        ax2up.plot(
+            [self.density(i) for i in grid], grid, color="#1f77b4", label="Density"
+        )
+        ax2up.set_xlabel("Density (kg/m³)", color="#1f77b4")
+        ax2up.tick_params("x", colors="#1f77b4")
+        ax2.set_ylabel("Height Above Sea Level (m)")
+        ax2.grid(True)
+
+        plt.subplots_adjust(wspace=0.5)
+        plt.show()
+
     def allInfo(self):
         """Prints out all data and graphs available about the Environment.
 
@@ -3304,6 +3368,11 @@ class Environment:
             surfaceTemperature=self.temperature(self.elevation),
             surfaceAirDensity=self.density(self.elevation),
             surfaceSpeedOfSound=self.speedOfSound(self.elevation),
+            datum=self.datum,
+            initialNorth=self.initialNorth,
+            initialHemisphere=self.initialHemisphere,
+            initialEast=self.initialEast,
+            initialEW=self.initialEW,
         )
         if self.date != None:
             info["launch_date"] = self.date.strftime("%Y-%d-%m %H:%M:%S")
@@ -3412,7 +3481,7 @@ class Environment:
 
         # Evaluate reference parameters
         K0 = 1 - 1 / 2500
-        e2 = 2 * flattening - flattening**2
+        e2 = 2 * flattening - flattening ** 2
         e2lin = e2 / (1 - e2)
 
         # Evaluate auxiliary parameters
@@ -3435,9 +3504,9 @@ class Environment:
 
         # Evaluate new auxiliary parameters
         J = (1 - t + c) * ag * ag * ag / 6
-        K = (5 - 18 * t + t * t + 72 * c - 58 * e2lin) * (ag**5) / 120
+        K = (5 - 18 * t + t * t + 72 * c - 58 * e2lin) * (ag ** 5) / 120
         L = (5 - t + 9 * c + 4 * c * c) * ag * ag * ag * ag / 24
-        M = (61 - 58 * t + t * t + 600 * c - 330 * e2lin) * (ag**6) / 720
+        M = (61 - 58 * t + t * t + 600 * c - 330 * e2lin) * (ag ** 6) / 720
 
         # Evaluate the final coordinates
         x = 500000 + K0 * n * (ag + J + K)
@@ -3510,7 +3579,7 @@ class Environment:
 
         # Calculate reference values
         K0 = 1 - 1 / 2500
-        e2 = 2 * flattening - flattening**2
+        e2 = 2 * flattening - flattening ** 2
         e2lin = e2 / (1 - e2)
         e1 = (1 - (1 - e2) ** 0.5) / (1 + (1 - e2) ** 0.5)
 
@@ -3534,20 +3603,20 @@ class Environment:
         t1 = np.tan(lat1) ** 2
         n1 = semiMajorAxis / ((1 - e2 * (np.sin(lat1) ** 2)) ** 0.5)
         quoc = (1 - e2 * np.sin(lat1) * np.sin(lat1)) ** 3
-        r1 = semiMajorAxis * (1 - e2) / (quoc**0.5)
+        r1 = semiMajorAxis * (1 - e2) / (quoc ** 0.5)
         d = (x - 500000) / (n1 * K0)
 
         # Calculate other auxiliary values
         I = (5 + 3 * t1 + 10 * c1 - 4 * c1 * c1 - 9 * e2lin) * d * d * d * d / 24
         J = (
             (61 + 90 * t1 + 298 * c1 + 45 * t1 * t1 - 252 * e2lin - 3 * c1 * c1)
-            * (d**6)
+            * (d ** 6)
             / 720
         )
         K = d - (1 + 2 * t1 + c1) * d * d * d / 6
         L = (
             (5 - 2 * c1 + 28 * t1 - 3 * c1 * c1 + 8 * e2lin + 24 * t1 * t1)
-            * (d**5)
+            * (d ** 5)
             / 120
         )
 
@@ -3610,8 +3679,8 @@ class Environment:
         # Calculate the Earth Radius in meters
         eRadius = np.sqrt(
             (
-                (np.cos(lat) * (semiMajorAxis**2)) ** 2
-                + (np.sin(lat) * (semiMinorAxis**2)) ** 2
+                (np.cos(lat) * (semiMajorAxis ** 2)) ** 2
+                + (np.sin(lat) * (semiMinorAxis ** 2)) ** 2
             )
             / ((np.cos(lat) * semiMajorAxis) ** 2 + (np.sin(lat) * semiMinorAxis) ** 2)
         )
